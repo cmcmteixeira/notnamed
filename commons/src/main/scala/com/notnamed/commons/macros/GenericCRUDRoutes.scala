@@ -1,33 +1,24 @@
 package com.notnamed.commons.macros
 
 import akka.http.scaladsl.server.Route
-import akka.http.scaladsl.unmarshalling.FromRequestUnmarshaller
-import akka.http.scaladsl.marshalling.ToResponseMarshaller
-
 import scala.language.experimental.macros
 import scala.reflect.macros.blackbox
 import slick.jdbc.MySQLProfile.api._
 import slick.lifted.TableQuery
 
-import scala.concurrent.ExecutionContext
-
 object GenericCRUDRoutes {
   def genericCrud[Entity]
-  (table: TableQuery[_ <: Table[Entity]], db: Database):
-  (FromRequestUnmarshaller[Entity],ToResponseMarshaller[Entity],ExecutionContext) => Route = macro GenericCRUDRoutes_impl.genericCrud_impl[Entity]
-
+  (table: TableQuery[_ <: Table[Entity]], db: Database): Route = macro GenericCRUDRoutes_impl.genericCrud_impl[Entity]
 }
 
 object GenericCRUDRoutes_impl {
   private case class TypeAndName(theType: String, name: String)
-  def genericCrud_impl[Entity: c.WeakTypeTag]
-  (c: blackbox.Context)
-  (table : c.Expr[TableQuery[_ <: Table[Entity]]], db: c.Expr[Database]):
-  c.Expr[(FromRequestUnmarshaller[Entity],ToResponseMarshaller[Entity],ExecutionContext) => Route] = {
+  def genericCrud_impl[Entity: c.WeakTypeTag](c: blackbox.Context)
+                                             (table : c.Expr[TableQuery[_ <: Table[Entity]]], db: c.Expr[Database]): c.Expr[Route] = {
     import c.universe._
     val entityType = weakTypeOf[Entity]
 
-    val entityName = q"${entityType.toString.toLowerCase}"
+    val entityName = q"${entityType.toString.toLowerCase.split("\\.").last}"
     val fields = entityType.members.filter {
       case m: TermSymbol if m.isAccessor && m.isPublic =>  true
       case m => false
@@ -44,59 +35,63 @@ object GenericCRUDRoutes_impl {
       theType = parameter.typeSignatureIn(entityType).toString,
       name = parameter.name.toString
     ))
-    //no id found for copyMethodsParamNames
-    val expr = c.Expr[(FromRequestUnmarshaller[_],ToResponseMarshaller[_],ExecutionContext) => Route](
-      q"""
-      new {
+    val expr = q"""
+      (() => {
         import akka.http.scaladsl.model.StatusCodes
-        import akka.http.scaladsl.server.Route
         val db = $db
         val tq = $table
-        def apply(implicit unmarshaller: FromRequestUnmarshaller[$entityType], marshaller: ToResponseMarshaller[$entityType], ec: ExecutionContext) : Route = {
-          path($entityName) {
-            post{entity(as[$entityType])} { e : $entityType => complete {
-                val query = (tq returning tq.map(_.id) into ((entity, id) => entity.copy(id = id)))
+        pathPrefix($entityName) {
+          pathEnd {
+            post{
+              entity(as[$entityType]) { e : $entityType =>
+                val query = (tq returning tq.map(_.id) into ((entity, id) => entity.copy(id = Some(id))))
                 val future = db.run(query += e)
                 onComplete(future){
                   case Success(value) => complete(StatusCodes.Created, value)
-                  case Failure(e) => complete(StatusCodes.Created, e)
+                  case Failure(e) => complete(StatusCodes.InternalServerError, e.getMessage)
                 }
               }
             }
+          } ~
+          path(IntNumber){ id =>
+            put {
+              entity(as[$entityType]) { e : $entityType =>
+                val query = (tq returning tq.map(_.id) into ((entity, id) => entity.copy(id = Some(id))))
+                val future = db.run(query += e)
+                onComplete(future){
+                  case Success(value) => complete(StatusCodes.Created, value)
+                  case Failure(e) => complete(StatusCodes.InternalServerError, e.getMessage)
+                }
+              }
+            } ~
+            delete {
+              val query = tq.filter(_.id === id).delete
+              val future = db.run(query)
+              onComplete(future){
+                case Success(value) => if(value == 1){
+                  complete(StatusCodes.OK,"")
+                } else {
+                  complete(StatusCodes.NotFound,"")
+                }
+                case Failure(e) => complete(StatusCodes.InternalServerError, e.getMessage)
+              }
+            } ~
+            get {
+              val query = tq.filter(_.id === id).result
+              val future = db.run(query)
+              onComplete(future){
+                case Success(value) => value
+                  .headOption
+                  .map(ent => complete(StatusCodes.OK,ent))
+                  .getOrElse(complete(StatusCodes.NotFound,""))
+                case Failure(e) => complete(StatusCodes.InternalServerError, e.getMessage)
+              }
+            }
           }
-       }
-      }
+        }
+      })()
       """
-    )
-    println(showCode(expr.tree))
-    expr
+    //c.abort(c.enclosingPosition,showCode(expr))
+    c.Expr[Route](expr)
   }
 }
-
-
-//MacrosLearning.genericCrud(DataContainer[TestCaseClassMegaAltamente](TestCaseClassMegaAltamente(2,3)))
-
-/**
-
-MacrosLearning.genericCrud(TestCaseClass("2",3))
-    println(className)
-    val fields = table.tree.tpe.widen
-    val expr = q"val a=$table;println(a);println(a);println(a)"
-    println(showCode(expr))
-
-
-  */
-
-/*
-
-object GenericCRUDRoutes {
-  def genericCrud[U](table: KeyedTable with Table[U]): Unit = macro genericCrud_impl[U]
-
-  def genericCrud_impl(c: blackbox.Context)(table: c.Expr[Table[_]]): c.Expr[Unit] = {
-    import c.universe._
-
-    reify { println(s"${weakTypeOf[T].toString}") }
-  }
-}
-
-*/

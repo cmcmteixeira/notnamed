@@ -23,7 +23,8 @@ object Api {
     val db = Database.forConfig("db")
     Http().bindAndHandle(
       Routes.apply(db),
-      config.getString("http.interface"), config.getInt("http.port")
+      config.getString("http.interface"),
+      config.getInt("http.port")
     )
   }
 }
