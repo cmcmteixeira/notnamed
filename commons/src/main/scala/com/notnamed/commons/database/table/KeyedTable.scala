@@ -1,8 +1,6 @@
 package com.notnamed.commons.database.table
-
-import slick.lifted.Rep
-
+import slick.jdbc.MySQLProfile.api._
 
 trait KeyedTable {
-  def id : Rep[Int]
+  def id : Rep[Long]
 }

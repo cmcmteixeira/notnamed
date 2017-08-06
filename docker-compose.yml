@@ -5,7 +5,7 @@ services:
     ports:
       - 3306:3306
     volumes:
-      - ./db_vol:/var/lib/mysql
+      - ./.docker/db_vol:/var/lib/mysql
     environment:
       - MYSQL_PASSWORD=password
       - MYSQL_USER=api

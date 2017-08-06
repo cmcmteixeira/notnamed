@@ -35,6 +35,11 @@ object GenericCRUDRoutes_impl {
       theType = parameter.typeSignatureIn(entityType).toString,
       name = parameter.name.toString
     ))
+
+    val filterPatchExpression = fields.map(property => s"entity.${property.name}=== entity").mkString(" && ")
+    val fieldSelectionPatchExpression = s"(${fields.map(property => s"e.${property.name}").mkString(", ")})"
+    val updateStatementPatchExpression = s"(${fields.map(property =>s"""Try(json.get("${property.name}s").map(_.convertTo[${property.theType}]).getOrElse(originalEntity.${property.name})).get""").mkString(", ")})"
+
     val expr = q"""
       (() => {
         import akka.http.scaladsl.model.StatusCodes
@@ -85,6 +90,35 @@ object GenericCRUDRoutes_impl {
                   .map(ent => complete(StatusCodes.OK,ent))
                   .getOrElse(complete(StatusCodes.NotFound,""))
                 case Failure(e) => complete(StatusCodes.InternalServerError, e.getMessage)
+              }
+            } ~
+            patch {
+              entity(as[String]) { jsonStr =>
+                val json = jsonStr.parseJson.asJsObject.fields
+                val future = db.run(
+                  tq.filter(_.id === id).result
+                ).map({ results =>
+                  results
+                    .headOption
+                    .map { originalEntity =>
+                      tq.filter(entity => {
+                        ${c.parse(filterPatchExpression)}
+                      }).map(e => {
+                        ${c.parse(fieldSelectionPatchExpression)}
+                      }).update((
+                        ${c.parse(updateStatementPatchExpression)}
+                      ))
+                    }
+                }).flatMap {
+                  case Some(action) => db.run(action).map(x => Some(x))
+                  case _ => Future.successful(None)
+                }
+                onComplete(future) {
+                  case Success(Some(value)) if value == 1 => complete(StatusCodes.OK,"Ok")
+                  case Success(Some(value)) => complete(StatusCodes.NotModified,"Not modified")
+                  case Success(None) => complete(StatusCodes.NotFound,"Not found")
+                  case _ => complete(StatusCodes.InternalServerError,"")
+                }
               }
             }
           }
