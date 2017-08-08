@@ -15,7 +15,7 @@ import spray.json._
 
 
 object Routes extends ApiProtocol {
-  def apply(db: Database)(implicit ec: ExecutionContext) = logRequestResult("akka-http-request") {
+/*  def apply(db: Database)(implicit ec: ExecutionContext) = logRequestResult("akka-http-request") {
     implicit val userFormat = jsonFormat3(User)
     /*
         val tq = TableQuery.apply[Users]
@@ -62,7 +62,7 @@ object Routes extends ApiProtocol {
           }
         }}*/
   }*/
-}}
+}*/}
 
 
 

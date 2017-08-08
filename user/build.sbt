@@ -10,4 +10,5 @@ val user =
   project.in(file("."))
     .aggregate(commons)
     .dependsOn(commons)
-
+libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.1" % "test"
+libraryDependencies += "org.mockito" % "mockito-all" % "2.+" % "test"

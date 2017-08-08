@@ -1,4 +1,4 @@
-name := "api"
+name := "commons"
 organization := "com"
 version := "1.0"
 scalaVersion := "2.12.3"

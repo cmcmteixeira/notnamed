@@ -1,5 +1,11 @@
 package com.notnamed.commons.time
 
-object TimeProvider {
+
+trait TimeProvider {
+  def now() : Long
+}
+
+
+object TimeProvider extends TimeProvider{
   def now() : Long = System.currentTimeMillis()
 }

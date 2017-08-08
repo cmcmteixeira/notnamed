@@ -1,27 +1,22 @@
 package com.notnamed.user.routes
 
-import akka.http.javadsl.model.StatusCode
-import akka.http.scaladsl.model.StatusCodes
+import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 import akka.http.scaladsl.server.Directives._
-import com.notnamed.commons.macros.GenericCRUDRoutes
 import com.notnamed.user.service.UserService
-import slick.lifted.TableQuery
-import slick.jdbc.MySQLProfile.api._
-
-import scala.concurrent.{Await, ExecutionContext, Future}
-import scala.util.{Failure, Success, Try}
-import spray.json._
 import com.notnamed.commons.directives.CustomDirectives._
+import com.notnamed.user.service.UserService.UserModel
+import spray.json._
 
+trait UserRoutesProtocol extends DefaultJsonProtocol with SprayJsonSupport {
+  implicit val jsonFormatUserModel = jsonFormat2(UserModel)
+}
 
+class UserRoutes(userService :UserService) extends UserRoutesProtocol {
 
-trait UserRoutes{
-  def userService :UserService
-
-  def userRoutes = logRequestResult("akka-http-request") {
+  def routes = logRequestResult("akka-http-request") {
     pathPrefix("user") {
-      entityFetching(userService.findUser _) ~
-      entityCreation(userService.createUser _)
+        fetchEntity(userService.findUser _) ~
+        createEntity(userService.createUser _)
     }
   }
 }

@@ -2,12 +2,13 @@ package com.notnamed.commons.database.dao
 
 import com.notnamed.commons.database.entity.KeyedEntity
 import com.notnamed.commons.database.table.KeyedTable
+import com.notnamed.commons.time.TimeProvider
 import slick.jdbc.MySQLProfile.api._
 
 import scala.concurrent.{ExecutionContext, Future}
 
 trait KeyedDao[T <: Table[Entity] with KeyedTable ,Entity <: KeyedEntity] {
-  val table = TableQuery.apply[T]
+  def table : TableQuery[T]
   def db : Database
   implicit def ec: ExecutionContext
 
@@ -20,9 +21,5 @@ trait KeyedDao[T <: Table[Entity] with KeyedTable ,Entity <: KeyedEntity] {
   def insert(entity: Entity) : Future[Long] = db.run {
     (table returning table.map(_.id)) += entity
   }
-  def insert(entities: Iterable[Entity]) : Future[List[Long]] = db.run {
-      (table returning table.map(_.id)) +=
-  }
-
 }
 

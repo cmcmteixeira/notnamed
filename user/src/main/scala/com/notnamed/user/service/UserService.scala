@@ -1,5 +1,6 @@
 package com.notnamed.user.service
 
+import com.notnamed.commons.time.TimeProvider
 import com.notnamed.user.database.dao.UserDao
 import com.notnamed.user.database.entity.User
 import com.notnamed.user.service.UserService.UserModel
@@ -8,10 +9,10 @@ import slick.jdbc.MySQLProfile.api._
 import scala.concurrent.{ExecutionContext, Future}
 
 object UserService {
-  case class UserModel(id: Option[Int], email: String)
+  case class UserModel(id: Option[Long], email: String)
 }
 
-class UserService(userDao: UserDao)(implicit ec: ExecutionContext, db: Database) {
+class UserService(userDao: UserDao)(implicit ec: ExecutionContext, timeProvider: TimeProvider) {
   def createUser(user: UserModel) : Future[Long] = userDao
     .insert(mapUserModelToUserEntity(user))
 
@@ -21,7 +22,9 @@ class UserService(userDao: UserDao)(implicit ec: ExecutionContext, db: Database)
 
   private def mapUserModelToUserEntity(userModel: UserModel) = User(
     userModel.id,
-    userModel.email
+    userModel.email,
+    timeProvider.now(),
+    timeProvider.now()
   )
 
   private def mapUserEntityToUserModel(user: User) = UserModel(

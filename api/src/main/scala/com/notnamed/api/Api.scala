@@ -18,10 +18,10 @@ object Api {
     //genericCrud[Users](new Users())
     val config = ConfigFactory.load()
     val db = Database.forConfig("db")
-    Http().bindAndHandle(
+   /* Http().bindAndHandle(
       Routes.apply(db),
       config.getString("http.interface"),
       config.getInt("http.port")
-    )
+    )*/
   }
 }
