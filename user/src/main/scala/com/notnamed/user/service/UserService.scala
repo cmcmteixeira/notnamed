@@ -4,7 +4,6 @@ import com.notnamed.commons.time.TimeProvider
 import com.notnamed.user.database.dao.UserDao
 import com.notnamed.user.database.entity.User
 import com.notnamed.user.service.UserService.UserModel
-import slick.jdbc.MySQLProfile.api._
 
 import scala.concurrent.{ExecutionContext, Future}
 

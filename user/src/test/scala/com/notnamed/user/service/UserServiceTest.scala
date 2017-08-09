@@ -31,11 +31,33 @@ class UserServiceTest extends AsyncWordSpec with MockitoSugar with Matchers with
          result shouldBe newUserId
       }
     }
-    "propagate any thrown errors" in {
-      when(timeProviderMock.now()).thenReturn(now)
-      when(userDaoMock.insert(User(None,newUser.email,now,now))).thenReturn(Future.failed(new IllegalArgumentException("Some wrong")))
-      val future = userService.createUser(newUser)
-      recoverToSucceededIf[IllegalArgumentException](future)
+  }
+
+  "findUser(userId)" should {
+    val userId = 11L
+    val user = User(
+      Some(userId),
+      "some@email.com",
+      now,
+      now
+    )
+    "return the user model object" in {
+      when(userDaoMock.findById(userId)).thenReturn(Future.successful(Some(user)))
+      whenReady(userService.findUser(userId)) { result =>
+        result shouldBe Some(UserModel(
+          user.id,
+          user.email
+        ))
+      }
+    }
+
+    "return None if no matches are found" in {
+      when(userDaoMock.findById(userId)).thenReturn(Future.successful(None))
+      whenReady(userService.findUser(userId)) { result =>
+        result shouldBe None
+      }
     }
   }
+
+
 }
