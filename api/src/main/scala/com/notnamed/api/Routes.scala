@@ -5,7 +5,6 @@ import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives._
 import com.notnamed.api.database.entity.User
 import com.notnamed.api.database.table.Users
-import com.notnamed.commons.macros.GenericCRUDRoutes
 import slick.lifted.TableQuery
 import slick.jdbc.MySQLProfile.api._
 

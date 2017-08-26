@@ -1,4 +1,5 @@
 package com.notnamed.commons.macros
+/*
 
 import akka.http.scaladsl.server.Route
 import scala.language.experimental.macros
@@ -129,3 +130,4 @@ object GenericCRUDRoutes_impl {
     c.Expr[Route](expr)
   }
 }
+*/

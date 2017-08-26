@@ -11,7 +11,7 @@ import org.scalatest.mockito.MockitoSugar
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class UserServiceTest extends AsyncWordSpec with MockitoSugar with Matchers with ScalaFutures {
+class UserServiceSpec extends AsyncWordSpec with MockitoSugar with Matchers with ScalaFutures {
   val now = 0L
   implicit val timeProviderMock = mock[TimeProvider]
   val userDaoMock = mock[UserDao]

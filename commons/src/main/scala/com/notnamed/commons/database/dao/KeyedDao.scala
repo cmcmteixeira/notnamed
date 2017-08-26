@@ -2,7 +2,6 @@ package com.notnamed.commons.database.dao
 
 import com.notnamed.commons.database.entity.KeyedEntity
 import com.notnamed.commons.database.table.KeyedTable
-import com.notnamed.commons.time.TimeProvider
 import slick.jdbc.MySQLProfile.api._
 
 import scala.concurrent.{ExecutionContext, Future}
