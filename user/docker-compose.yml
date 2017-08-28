@@ -12,12 +12,13 @@ services:
       - MYSQL_ROOT_PASSWORD=password
     expose:
       - 3306
-  user-tests:
+  it-tests:
     build:
-      context: ./user
+      context: .
     command: ["sbt","it:test"]
     volumes:
-      - ".:/app"
+      - ".:/app/user"
+      - "../commons:/app/commons"
       - "~/.sbt:/root/.sbt"
       - "~/.ivy2:/root/.ivy2"
     depends_on:
