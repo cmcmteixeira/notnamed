@@ -1,6 +1,6 @@
 version: "2"
 services:
-  db:
+  user-db:
     image: mariadb
     ports:
       - 3306:3306
@@ -10,9 +10,10 @@ services:
       - MYSQL_PASSWORD=password
       - MYSQL_USER=api
       - MYSQL_ROOT_PASSWORD=password
+      - MYSQL_DATABASE=user
     expose:
       - 3306
-  user-tests:
+  user:
     build:
       context: ./user
     command: ["sbt","it:test"]
@@ -21,4 +22,14 @@ services:
       - "~/.sbt:/root/.sbt"
       - "~/.ivy2:/root/.ivy2"
     depends_on:
-      - db
+      - user-db
+    ports:
+      - 5005:5005
+      - 3000:3000
+    environment:
+      - "DATABASE_URL=jdbc:mysql://user-db:3306/user"
+      - "DATABASE_PORT=3306"
+      - "DATABASE_USER=root"
+      - "DATABASE_PASSWORD=password"
+      - "HTTP_INTERFACE=0.0.0.0"
+      - "HTTP_PORT=3000"

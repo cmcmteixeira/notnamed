@@ -23,14 +23,13 @@ class Main {
 
     Http().bindAndHandle(
       routes,
-      config.getString("http.interface"),
-      config.getInt("http.port")
+      Config.http.interface,
+      Config.http.port
     )
-
   }
 
   def routes : Route = {
-    val db = Database.forConfig("db")
+    val db = Database.forConfig("database")
     implicit val timeProvider : TimeProvider = TimeProvider
     val userDao = new UserDao(db)
     val userService = new UserService(userDao)

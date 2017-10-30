@@ -1,5 +1,6 @@
 .docker
-**/project
+project/*
 **/.idea
 **/target
 !project/plugins.sbt
+!project/build.properties

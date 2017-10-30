@@ -9,22 +9,21 @@ import org.mockito.Mockito._
 import org.scalatest.Matchers
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.mockito.MockitoSugar
+
 import slick.jdbc.MySQLProfile.api._
 
 import scala.concurrent.ExecutionContext
 
-
 class UserDaoIntegrationSpec extends DaoSpec with MockitoSugar with Matchers with ScalaFutures with IntegrationPatience {
+
   val now = 100L
   implicit val timeProviderMock = mock[TimeProvider]
-  override val db = Database.forConfig("db")
-  val userDao = new UserDao(db)(ExecutionContext.global)
+  val userDao = new UserDao(database)(ExecutionContext.global)
   val userService = new UserService(userDao)(ExecutionContext.global,timeProviderMock)
+  def userGenerator() = UserModel(None, s"some${System.currentTimeMillis()}@email.com")
+  when(timeProviderMock.now()).thenReturn(now)
 
   "The UserDao" should {
-    println("the user DAO")
-    when(timeProviderMock.now()).thenReturn(now)
-    def userGenerator() = UserModel(None, s"some${System.currentTimeMillis()}@email.com")
     "create users" in {
       val userCreationFuture = userService.createUser(userGenerator())
       whenReady(userCreationFuture){ result =>
