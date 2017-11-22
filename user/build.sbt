@@ -18,4 +18,3 @@ val user =
 libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.1" % "it,test"
 libraryDependencies += "org.mockito" % "mockito-all" % "2.+" % "it,test"
 libraryDependencies += "org.flywaydb" % "flyway-core" % "4.2.0"
-libraryDependencies += "com.typesafe" % "config" % "1.3.1"

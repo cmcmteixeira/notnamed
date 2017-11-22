@@ -5,7 +5,7 @@ services:
     ports:
       - 3306:3306
     volumes:
-      - ./.docker/db_vol:/var/lib/mysql
+      - ./.db_vol:/var/lib/mysql
     environment:
       - MYSQL_PASSWORD=password
       - MYSQL_USER=api
@@ -16,7 +16,7 @@ services:
   user:
     build:
       context: ./user
-    command: ["sbt","it:test"]
+    command: ["sbt","run"]
     volumes:
       - ".:/app"
       - "~/.sbt:/root/.sbt"
@@ -33,3 +33,15 @@ services:
       - "DATABASE_PASSWORD=password"
       - "HTTP_INTERFACE=0.0.0.0"
       - "HTTP_PORT=3000"
+  zookeeper:
+    build:
+      context: docker/zookeeper
+    ports:
+      - 2181:2181
+  kafka:
+    build:
+      context: docker/kafka
+    ports:
+      - 9092:9092
+    depends_on:
+      - zookeeper

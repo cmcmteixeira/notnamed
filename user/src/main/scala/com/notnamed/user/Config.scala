@@ -15,4 +15,8 @@ object Config {
     val user: String = config.getString("database.user")
     val password: String = config.getString("database.password")
   }
+
+  val kafka = new {
+    val host: String = config.getString("kafka.")
+  }
 }
