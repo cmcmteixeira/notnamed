@@ -1,0 +1,4 @@
+CREATE TABLE groups(
+ id BIGINT AUTO_INCREMENT PRIMARY KEY,
+ createdOn LONG
+);

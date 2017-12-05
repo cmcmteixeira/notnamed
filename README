@@ -1,3 +1,20 @@
----SPECIAL CASES---
+------
+-- User
 
-DAO SPEC
+
+
+GROUP(group_uuid,trans_id, status)-------U1(uuid,action,status)
+                                        |-----U2(uuid.action)
+                                        |-----U3(uuid,action)
+
+{
+    groupId: "uuid",
+    members : {
+        uuid : {
+            user: oCarlos
+            memberSince: "21-01-08"
+        }
+    }
+}
+
+

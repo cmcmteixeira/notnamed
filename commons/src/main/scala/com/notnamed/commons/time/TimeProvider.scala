@@ -1,11 +1,11 @@
 package com.notnamed.commons.time
 
-
-trait TimeProvider {
-  def now() : Long
-}
+import java.sql.Timestamp
+import java.time.{Clock, LocalDateTime}
 
 
-object TimeProvider extends TimeProvider{
-  def now() : Long = System.currentTimeMillis()
+
+
+class TimeProvider(clock: Clock){
+  def now() : Timestamp = Timestamp.valueOf(LocalDateTime.now(clock))
 }

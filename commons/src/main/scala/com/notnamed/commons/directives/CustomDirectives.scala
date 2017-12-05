@@ -1,5 +1,7 @@
 package com.notnamed.commons.directives
 
+import java.util.UUID
+
 import akka.http.scaladsl.marshalling.ToEntityMarshaller
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives._
@@ -16,25 +18,27 @@ trait CustomDirectives {
     onComplete(future){
       case Success(Some(value)) => complete((StatusCodes.OK, value))
       case Success(None) => complete(StatusCodes.NotFound,"Not Found")
-      case Failure(exception) => complete(StatusCodes.InternalServerError,"An error ")
+      case Failure(_) => complete(StatusCodes.InternalServerError,"")
     }
   }
 
-  def createdOr500(future: Future[Long]) : Route = {
+  def createdOr500(future: Future[Unit]) : Route = {
     onComplete(future){
-      case Success(id) => complete(StatusCodes.Created,"")
+      case Success(_) => complete(StatusCodes.Created,"")
       case _ => complete(StatusCodes.InternalServerError,"")
     }
   }
-  def createEntity[T](creationFunc: (T) => Future[Long])(implicit marshaller: ToEntityMarshaller[T], fromRequest: FromRequestUnmarshaller[T])  : Route = {
+
+  def createEntity[T](creationFunc: (T) => Future[Unit])(implicit fromRequest: FromRequestUnmarshaller[T])  : Route = {
     post {
       entity(as[T]) { entity =>
          createdOr500(creationFunc(entity))
       }
     }
   }
-  def fetchEntity[T](entityAccess: (Long) => Future[Option[T]])(implicit marshaller: ToEntityMarshaller[T]) : Route = {
-    path(LongNumber) { entityId =>
+
+  def fetchEntity[T](entityAccess: (UUID) => Future[Option[T]])(implicit marshaller: ToEntityMarshaller[T]) : Route = {
+    path(JavaUUID) { entityId =>
       get {
         someOr404(entityAccess(entityId))
       }

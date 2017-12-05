@@ -30,3 +30,7 @@ libraryDependencies ++= {
     "org.mockito" % "mockito-core" % "1.8.5" % "test"
   )
 }
+
+project.in(file("."))
+  .configs(IntegrationTest)
+  .settings(Defaults.itSettings : _*)

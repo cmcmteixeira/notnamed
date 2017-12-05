@@ -1,6 +1,6 @@
 version: "2"
 services:
-  user-db:
+  users-db:
     image: mariadb
     ports:
       - 3306:3306
@@ -13,7 +13,7 @@ services:
       - MYSQL_DATABASE=user
     expose:
       - 3306
-  user:
+  users:
     build:
       context: ./user
     command: ["sbt","run"]
@@ -22,7 +22,7 @@ services:
       - "~/.sbt:/root/.sbt"
       - "~/.ivy2:/root/.ivy2"
     depends_on:
-      - user-db
+      - users-db
     ports:
       - 5005:5005
       - 3000:3000
