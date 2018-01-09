@@ -1,7 +1,9 @@
 package com.notnamed.user.database.entity
 
-import com.notnamed.commons.time.TimeProvider
+import java.util.UUID
 
-case class User(id: Option[Long], email: String, createdOn: Long , updatedOn: Long ) extends KeyedEntity
+import com.notnamed.commons.entity.{AuditUUIDEntity, AuditInfo}
+
+case class User(id: UUID, email: String, audit: AuditInfo ) extends AuditUUIDEntity
 
 

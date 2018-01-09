@@ -1,5 +1,8 @@
 package com.notnamed.user
 
+import java.time.Clock
+import java.util.UUID
+
 import akka.actor.ActorSystem
 import akka.event.Logging
 import akka.http.scaladsl.Http
@@ -32,10 +35,10 @@ class Users {
 
   def routes : Route = {
     val db = Database.forConfig("database")
-    implicit val timeProvider : TimeProvider = TimeProvider
+    implicit val timeProvider : TimeProvider = new TimeProvider(Clock.systemUTC())
 
     val userDao = new UserDao(db)
-    val userService = new UserService(userDao)
+    val userService = new UserService(userDao, UUID.randomUUID)
     val userRoutes = new UserRoutes(userService)
 
     val producer: ProducerSettings[Array[Byte], String] = ProducerSettings(Config.config, new ByteArraySerializer, new StringSerializer)

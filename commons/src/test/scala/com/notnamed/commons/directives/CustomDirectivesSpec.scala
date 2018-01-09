@@ -1,5 +1,7 @@
 package com.notnamed.commons.directives
 
+import java.util.UUID
+
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.{Matchers, WordSpec}
 import akka.http.scaladsl.model.StatusCodes
@@ -44,7 +46,7 @@ class CustomDirectivesSpec extends WordSpec with Matchers with ScalaFutures with
   "createdOr500" should {
     "return created if the future is successful" in {
         val route = post {
-          CustomDirectives.createdOr500(Future.successful("something"))
+          CustomDirectives.createdOr500(Future.successful(UUID.randomUUID()))
         }
       Post() ~> route ~> check {
         status shouldBe StatusCodes.Created
@@ -65,7 +67,7 @@ class CustomDirectivesSpec extends WordSpec with Matchers with ScalaFutures with
   "createEntity" should {
     "return created if the future is successful" in {
       val route = post {
-        CustomDirectives.createEntity[String]((_) => Future.successful(()))
+        CustomDirectives.createEntity[String]((_) => Future.successful(UUID.randomUUID()))
       }
       Post("/submit",Some("thing")) ~> route ~> check {
         status shouldBe StatusCodes.Created
@@ -74,7 +76,7 @@ class CustomDirectivesSpec extends WordSpec with Matchers with ScalaFutures with
 
     "return a status code 500 " in {
       val route = post {
-        CustomDirectives.createEntity[String]((_) => Future.failed[Unit](new Exception("something")))
+        CustomDirectives.createEntity[String]((_) => Future.failed[UUID](new Exception("something")))
       }
       Post("/submit",Some("thing")) ~> route ~> check {
         status shouldBe StatusCodes.InternalServerError

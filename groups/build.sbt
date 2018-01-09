@@ -6,8 +6,7 @@ scalaVersion := "2.12.3"
 scalacOptions := Seq("-unchecked", "-deprecation", "-encoding", "utf8")
 
 lazy val commons = RootProject(file("../commons"))
-val contacts =
-  project.in(file("."))
+val groups = project.in(file("."))
     .aggregate(commons)
     .dependsOn(commons)
 

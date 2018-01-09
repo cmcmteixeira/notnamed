@@ -7,6 +7,7 @@ import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.unmarshalling.FromRequestUnmarshaller
+import com.notnamed.commons.logging.{LoggingContext, RequestContext}
 
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
@@ -22,14 +23,14 @@ trait CustomDirectives {
     }
   }
 
-  def createdOr500(future: Future[Unit]) : Route = {
+  def createdOr500(future: Future[UUID]) : Route = {
     onComplete(future){
       case Success(_) => complete(StatusCodes.Created,"")
       case _ => complete(StatusCodes.InternalServerError,"")
     }
   }
 
-  def createEntity[T](creationFunc: (T) => Future[Unit])(implicit fromRequest: FromRequestUnmarshaller[T])  : Route = {
+  def createEntity[T](creationFunc: (T) => Future[UUID])(implicit fromRequest: FromRequestUnmarshaller[T])  : Route = {
     post {
       entity(as[T]) { entity =>
          createdOr500(creationFunc(entity))
@@ -43,5 +44,9 @@ trait CustomDirectives {
         someOr404(entityAccess(entityId))
       }
     }
+  }
+
+  def withRequestContext(directives : (LoggingContext) => Route) : Route = {
+    directives(RequestContext(UUID.randomUUID()))
   }
 }

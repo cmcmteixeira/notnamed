@@ -27,10 +27,12 @@ libraryDependencies ++= {
     "com.typesafe.slick" %% "slick-hikaricp" % "3.2.0",
     "org.scala-lang" % "scala-reflect" % "2.12.1",
     "org.scalatest"     %% "scalatest" % scalaTestV % "test",
-    "org.mockito" % "mockito-core" % "1.8.5" % "test"
+    "org.mockito" % "mockito-core" % "1.8.5" % "test",
+    "ch.qos.logback" % "logback-classic" % "1.2.3",
+    "com.typesafe.scala-logging" %% "scala-logging" % "3.7.2"
   )
 }
 
-project.in(file("."))
+val commons = project.in(file("."))
   .configs(IntegrationTest)
   .settings(Defaults.itSettings : _*)
