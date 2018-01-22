@@ -5,12 +5,12 @@ import java.util.UUID
 import akka.http.scaladsl.marshalling.ToEntityMarshaller
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives._
-import akka.http.scaladsl.server.Route
+import akka.http.scaladsl.server.{Directive1, Route}
 import akka.http.scaladsl.unmarshalling.FromRequestUnmarshaller
-import com.notnamed.commons.logging.{LoggingContext, RequestContext}
+import com.notnamed.commons.logging.RequestContext
 
 import scala.concurrent.Future
-import scala.util.{Failure, Success}
+import scala.util.{Failure, Success, Try}
 
 object CustomDirectives extends CustomDirectives
 
@@ -25,7 +25,7 @@ trait CustomDirectives {
 
   def createdOr500(future: Future[UUID]) : Route = {
     onComplete(future){
-      case Success(_) => complete(StatusCodes.Created,"")
+      case Success(uuid) => complete(StatusCodes.Created, uuid.toString)
       case _ => complete(StatusCodes.InternalServerError,"")
     }
   }
@@ -46,7 +46,19 @@ trait CustomDirectives {
     }
   }
 
-  def withRequestContext(directives : (LoggingContext) => Route) : Route = {
-    directives(RequestContext(UUID.randomUUID()))
+
+  def withRequestContext : Directive1[RequestContext] = new Directive1[RequestContext] {
+    override def tapply(f: (Tuple1[RequestContext]) => Route): Route = {
+      optionalHeaderValueByName("X-Request-ID") { header =>
+        val context = Try{
+          header.map(UUID.fromString)
+        } match {
+          case Success(Some(uuid)) => RequestContext(uuid)
+          case _ => RequestContext(UUID.randomUUID())
+        }
+        f(Tuple1(context))
+      }
+    }
   }
+
 }

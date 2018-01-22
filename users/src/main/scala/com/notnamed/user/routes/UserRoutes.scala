@@ -12,10 +12,12 @@ trait UserRoutesProtocol extends BaseProtocol {
 }
 
 class UserRoutes(userService :UserService) extends UserRoutesProtocol {
-  def routes = logRequestResult("akka-http-request") {
-    pathPrefix("user") {
+  def routes = withRequestContext{ implicit context =>
+    logRequestResult("akka-http-request") {
+      pathPrefix("user") {
         fetchEntity(userService.findUser) ~
-        createEntity(userService.createUser)
+          createEntity(userService.createUser)
+      }
     }
   }
 }

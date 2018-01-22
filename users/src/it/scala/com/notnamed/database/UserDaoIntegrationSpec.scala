@@ -1,53 +1,69 @@
 package com.notnamed.database
 
+import java.sql.Timestamp
+import java.time.LocalDateTime
 import java.util.UUID
 
 import com.notnamed.commons.time.TimeProvider
+import com.notnamed.commons.uuid.UUIDGenerator
 import com.notnamed.helper.DaoSpec
 import com.notnamed.user.database.dao.UserDao
 import com.notnamed.user.service.UserService
-import com.notnamed.user.service.UserService.UserModel
-import org.mockito.Mockito._
+import com.notnamed.user.service.UserService.{NewUser, UserModel}
 import org.scalatest.Matchers
-import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
+import org.mockito.Mockito._
 import org.scalatest.mockito.MockitoSugar
-import slick.jdbc.MySQLProfile.api._
 
 import scala.concurrent.ExecutionContext
 
-class UserDaoIntegrationSpec extends DaoSpec with MockitoSugar with Matchers with ScalaFutures with IntegrationPatience {
-/*
-  val now = 100L
+class UserDaoIntegrationSpec extends DaoSpec with MockitoSugar with Matchers {
   implicit val timeProviderMock = mock[TimeProvider]
+  val uuidGenMock = mock[UUIDGenerator]
+  val now = Timestamp.valueOf(LocalDateTime.now)
   val userDao = new UserDao(database)(ExecutionContext.global)
-  val userService = new UserService(userDao, UUID.randomUUID _)(ExecutionContext.global,timeProviderMock)
-  def userGenerator() = UserModel(None, s"some${System.currentTimeMillis()}@email.com")
-  when(timeProviderMock.now()).thenReturn(now)
+  val userService = new UserService(userDao, uuidGenMock)(ExecutionContext.global, timeProviderMock)
+
+  def userEmail = s"user${System.currentTimeMillis()}@tests.com"
 
   "The UserDao" should {
     "create users" in {
-      val userCreationFuture = userService.createUser(userGenerator())
-      whenReady(userCreationFuture){ result =>
-        result > 0 shouldBe true
-      }
+      val uuid = UUID.randomUUID()
+      when(uuidGenMock.apply()).thenReturn(uuid)
+      userService
+        .createUser(NewUser(userEmail))
+        .map(result => {
+          result shouldBe uuid
+        })
     }
 
     "allow the retrieval of created users" in {
-      val newUser = userGenerator()
+      val uuid = UUID.randomUUID()
+      when(uuidGenMock.apply()).thenReturn(uuid)
       userService
-        .createUser(newUser)
+        .createUser(NewUser(userEmail))
         .flatMap { createdUser =>
-          whenReady(userService.findUser(createdUser)) { result =>
-            result shouldBe Some(newUser.copy(id = Some(createdUser)))
-          }
-        }
+          userService.findUser(createdUser)
+        }.map { result =>
+        result shouldBe Some(UserModel(uuid, userEmail))
+      }
+    }
+
+    "fail if an attempt is made to create two users w/ same email are" in {
+      when(uuidGenMock.apply()).thenReturn(UUID.randomUUID())
+      when(uuidGenMock.apply()).thenReturn(UUID.randomUUID())
+      recoverToSucceededIf[Throwable]{
+        userService
+          .createUser(NewUser(userEmail))
+          .flatMap(_ =>userService.createUser(NewUser(userEmail)))
+      }
     }
 
     "return None for non existent userIds" in {
-      whenReady(userService.findUser(Long.MaxValue)) { result =>
-        result shouldBe None
-      }
+      userService
+        .findUser(UUID.randomUUID())
+        .map { result =>
+          result shouldBe None
+        }
     }
-  }*/
-
+  }
 }

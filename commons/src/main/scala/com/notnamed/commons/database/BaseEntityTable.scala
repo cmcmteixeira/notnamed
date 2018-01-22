@@ -12,7 +12,7 @@ trait BaseEntityTable[T <: AuditUUIDEntity]  { self : RelationalTableComponent#T
   def id = column[UUID]("id",O.PrimaryKey)
   def createdOn = column[Timestamp]("createdOn")
   def updatedOn = column[Timestamp]("updatedOn")
-  def deletedOn = column[Option[Timestamp]]("deletedOn")
+  def deletedOn = column[Option[Timestamp]]("deletedOn",O.Default(None))
 
   def audit = (createdOn,updatedOn,deletedOn) <> (AuditInfo.tupled,AuditInfo.unapply)
 }

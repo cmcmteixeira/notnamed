@@ -3,20 +3,23 @@ package com.notnamed.user.service
 import java.util.UUID
 
 import com.notnamed.commons.entity.AuditInfo
+import com.notnamed.commons.logging.{FutureLogging, LoggerWithContext, RequestContext}
 import com.notnamed.commons.time.TimeProvider
+import com.notnamed.commons.uuid.UUIDGenerator
 import com.notnamed.user.database.dao.UserDao
 import com.notnamed.user.database.entity.User
 import com.notnamed.user.service.UserService.{NewUser, UserModel}
 
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.Success
 
 object UserService {
   case class UserModel(id: UUID, email: String)
   case class NewUser(email: String)
 }
 
-class UserService(userDao: UserDao, uuidGen: () => UUID)(implicit ec: ExecutionContext, timeProvider: TimeProvider) {
-  def createUser(newUser: NewUser) : Future[UUID] = userDao
+class UserService(userDao: UserDao,uuidGen: UUIDGenerator)(implicit ec: ExecutionContext, timeProvider: TimeProvider) extends LoggerWithContext with FutureLogging {
+  def createUser(newUser: NewUser)(implicit requestContext: RequestContext) : Future[UUID] = userDao
     .insert(User(
       uuidGen(),
       newUser.email,
@@ -25,12 +28,17 @@ class UserService(userDao: UserDao, uuidGen: () => UUID)(implicit ec: ExecutionC
         updatedOn = timeProvider.now()
       )
     ))
+    .andThen(logFutureFailure)
 
-  def findUser(id: UUID) : Future[Option[UserModel]]= userDao
+  def findUser(id: UUID)(implicit requestContext: RequestContext) : Future[Option[UserModel]]= userDao
     .findById(id)
+    .andThen{
+      case Success(Some(_)) => logger.info(s"Found user with [id:$id]")
+      case Success(None) => logger.warn(s"User for [id:$id] was not found")
+    }
     .map{ user =>
       user.map(mapUserEntityToUserModel)
-    }
+    }.andThen(logFutureFailure)
 
   private def mapUserModelToUserEntity(userModel: UserModel) = User(
     userModel.id,

@@ -17,6 +17,6 @@ object Config {
   }
 
   val kafka = new {
-    val host: String = config.getString("kafka.")
+    val host: String = config.getString("kafka.host")
   }
 }

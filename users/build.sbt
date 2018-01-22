@@ -1,5 +1,3 @@
-import sbt.Def
-
 name := "users"
 organization := "com.notnamed.users"
 version := "1.0"
@@ -8,8 +6,8 @@ scalaVersion := "2.12.3"
 scalacOptions := Seq("-unchecked", "-deprecation", "-encoding", "utf8")
 
 lazy val commons = RootProject(file("../commons"))
-val user =
-  project.in(file("."))
+
+val users = project.in(file("."))
     .configs(IntegrationTest)
     .settings(Defaults.itSettings : _*)
     .aggregate(commons)

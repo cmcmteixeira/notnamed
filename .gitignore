@@ -2,5 +2,7 @@
 project/*
 **/.idea
 **/target
-!project/plugins.sbt
-!project/build.properties
+!**/project/plugins.sbt
+!**/project/build.properties
+docker/mariadb/data
+project

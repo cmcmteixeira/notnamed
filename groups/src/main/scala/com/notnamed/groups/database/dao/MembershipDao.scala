@@ -5,6 +5,7 @@ import java.util.UUID
 import com.notnamed.commons.database.BaseDao
 import com.notnamed.commons.entity.AuditInfo
 import com.notnamed.commons.time.TimeProvider
+import com.notnamed.commons.uuid.UUIDGenerator
 import com.notnamed.groups.database.entity.Member
 import com.notnamed.groups.database.table.Members
 import slick.jdbc.MySQLProfile
@@ -19,10 +20,10 @@ object MembershipDao{
 }
 
 class MembershipDao(val db: Database)
-                   (implicit uuidGen : () => UUID, val ec: ExecutionContext, timeProvider: TimeProvider) extends BaseDao[Members,Member] {
+                   (implicit ec: ExecutionContext, timeProvider: TimeProvider) extends BaseDao[Members,Member] {
 
   val table = TableQuery[Members]
-
+/*
   def addMember(groupId: UUID, member: UUID): Future[UUID] = {
     val entity = Member(uuidGen(), member, groupId, AuditInfo(
       timeProvider.now(),
@@ -32,7 +33,7 @@ class MembershipDao(val db: Database)
       table += entity
     }.map(insertionCheck(entity))
       .map(_ => entity.id)
-  }
+  }*/
 
   def removeMember(groupId: UUID, member: UUID): Future[Unit] = db.run {
     withMembershipFilters(

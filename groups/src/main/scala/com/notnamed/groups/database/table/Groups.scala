@@ -9,10 +9,10 @@ import slick.lifted.Tag
 
 import scala.concurrent.ExecutionContext
 
-class Groups(tag: Tag)(implicit ec: ExecutionContext) extends Table[Group](tag,"group") with BaseEntityTable[Group] {
+class Groups(tag: Tag)(implicit ec: ExecutionContext) extends Table[Group](tag,"groups") with BaseEntityTable[Group] {
 
   def name = column[String]("name",O.Length(128))
-  def owner = column[UUID]("owner")
+  def createdBy = column[UUID]("createdBy")
 
-  def * = (id,name,owner,audit) <> (Group.tupled, Group.unapply)
+  def * = (id,name,createdBy,audit) <> (Group.tupled, Group.unapply)
 }

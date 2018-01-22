@@ -6,19 +6,27 @@ import akka.actor.ActorSystem
 import akka.event.{Logging, LoggingAdapter}
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.server.Route
+import akka.kafka.ProducerSettings
 import akka.stream.ActorMaterializer
-import com.notnamed.commons.database.UUIDGenerator
-import com.notnamed.commons.directives.CustomDirectives
-import com.notnamed.commons.logging.LoggingContext
+import akka.stream.scaladsl.Source
+import akka.util.ByteString
+import com.notnamed.commons.kafka.KafkaTopicProducer
 import com.notnamed.commons.time.TimeProvider
-import com.notnamed.groups.database.dao.GroupDao
+import com.notnamed.commons.uuid.UUIDGenerator
+import com.notnamed.groups.dal.UserDal
+import com.notnamed.groups.database.dao.{GroupDao, MembershipDao}
+import com.notnamed.groups.routes.GroupRoutes
+import com.notnamed.groups.services.GroupService
+import com.softwaremill.sttp.SttpBackend
+import com.softwaremill.sttp.akkahttp.AkkaHttpBackend
 import com.typesafe.config.ConfigFactory
-import slick.jdbc.MySQLProfile.api._
+import org.apache.kafka.clients.producer.KafkaProducer
+import org.apache.kafka.common.serialization.StringSerializer
 
-import scala.concurrent.{ExecutionContext, ExecutionContextExecutor}
+import scala.concurrent.{ExecutionContext, ExecutionContextExecutor, Future}
 
-class Groups {
-
+object Groups {
+  import slick.jdbc.MySQLProfile.api._
   implicit val system: ActorSystem = ActorSystem()
   implicit val executor: ExecutionContextExecutor = system.dispatcher
   implicit val materializer: ActorMaterializer = ActorMaterializer()
@@ -35,23 +43,36 @@ class Groups {
   }
 
   def routes : Route = {
+    implicit val sttpBackend: SttpBackend[Future, Source[ByteString, Any]] = AkkaHttpBackend.usingActorSystem(system)
+
     val db = Database.forConfig("database")
     implicit val clock : Clock = Clock.systemUTC()
     implicit val timeProvider: TimeProvider = new TimeProvider(clock)
     implicit val ec: ExecutionContext = ExecutionContext.global
+    val uuidGenerator = new UUIDGenerator
+
+    val producerSettings: ProducerSettings[String, String] = ProducerSettings(
+      Config.config.getConfig("akka.kafka.producer"),
+      new StringSerializer,
+      new StringSerializer
+    ).withBootstrapServers("kafka:9092")
+
+    val producer: KafkaProducer[String, String] = producerSettings
+      .createKafkaProducer()
+    val kafkaProducer = new KafkaTopicProducer("groups")(producerSettings,producer)
+
+    val groupDao = new GroupDao(db)
+    val memberShipDao = new MembershipDao(db)
+    val userDal = new UserDal(Config.remotes.user)
+    val groupService = new GroupService(
+      groupDao,
+      memberShipDao,userDal,
+      uuidGenerator,
+      kafkaProducer
+    )
 
 
-    val groupDao = new GroupDao(db,UUIDGenerator.genUUID _)
-
-    CustomDirectives.withRequestContext { context : LoggingContext =>
-      ???
-    }
-
-    //val groupService = new GroupService(groupDao)
-
-
-    //val producer: ProducerSettings[Array[Byte], String] = ProducerSettings(Config.config, new ByteArraySerializer, new StringSerializer)
-
+    new GroupRoutes(groupService).routes()
   }
 
 }

@@ -20,7 +20,7 @@ object GroupDao {
                          )
 }
 
-class GroupDao(db: Database,uuidGen : () => UUID)(implicit ec: ExecutionContext, timeProvider: TimeProvider) extends BaseDao[Groups,Group]{
+class GroupDao(db: Database)(implicit ec: ExecutionContext, timeProvider: TimeProvider) extends BaseDao[Groups,Group]{
   val table = TableQuery[Groups]
 
   def createGroup(group: Group) : Future[UUID]= db.run {
@@ -39,7 +39,7 @@ class GroupDao(db: Database,uuidGen : () => UUID)(implicit ec: ExecutionContext,
                                 active: Option[Boolean] = None
                               ) = baseFilterApplier(
     id.map( id => (g: BaseDaoQuery) => g.filter(_.id === id)),
-    owner.map(owner => (groups: BaseDaoQuery) => groups.filter(_.owner === owner)),
+    owner.map(owner => (groups: BaseDaoQuery) => groups.filter(_.createdBy === owner)),
     active.map {
       case true => (groups: BaseDaoQuery) => groups.filter(_.deletedOn.isEmpty)
       case false => (groups: BaseDaoQuery) => groups.filter(_.deletedOn.isDefined)

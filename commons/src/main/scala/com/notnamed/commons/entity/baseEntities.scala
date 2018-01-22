@@ -16,4 +16,3 @@ case class AuditInfo(
   updatedOn: Timestamp,
   deletedOn: Option[Timestamp] = None
 )
-

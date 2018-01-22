@@ -10,19 +10,17 @@ val akkaHttpV   = "10.0.10"
 val scalaTestV  = "3.0.1"
 libraryDependencies ++= {
   Seq(
-    "com.softwaremill.sttp" %% "core" % "0.0.2",
+    "com.softwaremill.sttp" %% "core" % "1.1.4",
+    "com.softwaremill.sttp" %% "akka-http-backend" % "1.1.4",
     "com.typesafe.akka" %% "akka-actor" % akkaV,
     "com.typesafe.akka" %% "akka-stream" % akkaV,
     "com.typesafe.akka" %% "akka-testkit" % akkaV,
     "com.typesafe.akka" %% "akka-http" % akkaHttpV,
     "com.typesafe.akka" %% "akka-http-spray-json" % akkaHttpV,
     "com.typesafe.akka" %% "akka-http-testkit" % akkaHttpV,
-    "com.typesafe.akka" %% "akka-stream" % akkaV ,
-    "com.typesafe.akka" %% "akka-actor" % akkaV,
     "com.typesafe.akka" %% "akka-stream-kafka" % "0.17",
     "com.typesafe.slick" %% "slick" % "3.2.0",
     "com.typesafe" % "config" % "1.3.1",
-    "org.slf4j" % "slf4j-nop" % "1.6.4",
     "mysql" % "mysql-connector-java" % "5.1.12",
     "com.typesafe.slick" %% "slick-hikaricp" % "3.2.0",
     "org.scala-lang" % "scala-reflect" % "2.12.1",
