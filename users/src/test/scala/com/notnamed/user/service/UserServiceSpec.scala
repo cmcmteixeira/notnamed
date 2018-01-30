@@ -19,7 +19,7 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Random
 
 class UserServiceSpec extends AsyncWordSpec with MockitoSugar with Matchers  {
-  val now = Timestamp.valueOf(LocalDateTime.now())
+ /* val now = Timestamp.valueOf(LocalDateTime.now())
 
   implicit val uuidGenerator = mock[UUIDGenerator]
   implicit val timeProviderMock= mock[TimeProvider]
@@ -74,5 +74,5 @@ class UserServiceSpec extends AsyncWordSpec with MockitoSugar with Matchers  {
         result shouldBe None
       }
     }
-  }
+  }*/
 }

@@ -6,7 +6,13 @@ sealed trait TraceContext {
   def formatted: String
 }
 
-case class RequestContext(requestId: UUID) extends TraceContext {
-  override def formatted = s"[req:$requestId]"
+object EmptyLoggingContext {
+  def apply(): EmptyLoggingContext = new EmptyLoggingContext()
+}
 
+final class EmptyLoggingContext extends TraceContext {
+  override def formatted = "[]"
+}
+case class UniqueLoggingContext(identifier: UUID) extends TraceContext {
+  override def formatted = s"[id:$identifier]"
 }

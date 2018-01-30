@@ -8,6 +8,7 @@ scalacOptions := Seq("-unchecked", "-deprecation", "-encoding", "utf8")
 val akkaV       = "2.5.6"
 val akkaHttpV   = "10.0.10"
 val scalaTestV  = "3.0.1"
+val circeVersion = "0.9.0"
 libraryDependencies ++= {
   Seq(
     "com.softwaremill.sttp" %% "core" % "1.1.4",
@@ -27,7 +28,10 @@ libraryDependencies ++= {
     "org.scalatest"     %% "scalatest" % scalaTestV % "test",
     "org.mockito" % "mockito-core" % "1.8.5" % "test",
     "ch.qos.logback" % "logback-classic" % "1.2.3",
-    "com.typesafe.scala-logging" %% "scala-logging" % "3.7.2"
+    "com.typesafe.scala-logging" %% "scala-logging" % "3.7.2",
+    "io.circe" %% "circe-core" % circeVersion,
+    "io.circe" %% "circe-generic" % circeVersion,
+    "io.circe" %% "circe-parser" % circeVersion
   )
 }
 

@@ -25,7 +25,7 @@ class UserDaoIntegrationSpec extends DaoSpec with MockitoSugar with Matchers {
 
   def userEmail = s"user${System.currentTimeMillis()}@tests.com"
 
-  "The UserDao" should {
+  /*"The UserDao" should {
     "create users" in {
       val uuid = UUID.randomUUID()
       when(uuidGenMock.apply()).thenReturn(uuid)
@@ -65,5 +65,5 @@ class UserDaoIntegrationSpec extends DaoSpec with MockitoSugar with Matchers {
           result shouldBe None
         }
     }
-  }
+  }*/
 }

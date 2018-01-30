@@ -5,9 +5,9 @@ import java.util.UUID
 import akka.http.scaladsl.marshalling.ToEntityMarshaller
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives._
-import akka.http.scaladsl.server.{Directive1, Route}
+import akka.http.scaladsl.server.{Directive0, Directive1, Route}
 import akka.http.scaladsl.unmarshalling.FromRequestUnmarshaller
-import com.notnamed.commons.logging.RequestContext
+import com.notnamed.commons.logging.UniqueLoggingContext
 
 import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
@@ -47,14 +47,14 @@ trait CustomDirectives {
   }
 
 
-  def withRequestContext : Directive1[RequestContext] = new Directive1[RequestContext] {
-    override def tapply(f: (Tuple1[RequestContext]) => Route): Route = {
+  def withRequestContext : Directive1[UniqueLoggingContext] = new Directive1[UniqueLoggingContext] {
+    override def tapply(f: (Tuple1[UniqueLoggingContext]) => Route): Route = {
       optionalHeaderValueByName("X-Request-ID") { header =>
         val context = Try{
           header.map(UUID.fromString)
         } match {
-          case Success(Some(uuid)) => RequestContext(uuid)
-          case _ => RequestContext(UUID.randomUUID())
+          case Success(Some(uuid)) => UniqueLoggingContext(uuid)
+          case _ => UniqueLoggingContext(UUID.randomUUID())
         }
         f(Tuple1(context))
       }

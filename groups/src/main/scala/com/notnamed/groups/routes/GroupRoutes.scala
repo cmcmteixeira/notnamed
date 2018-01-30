@@ -3,7 +3,7 @@ package com.notnamed.groups.routes
 import akka.http.scaladsl.server.Directives.{pathPrefix, _}
 import akka.http.scaladsl.server.Route
 import com.notnamed.commons.directives.CustomDirectives._
-import com.notnamed.commons.logging.RequestContext
+import com.notnamed.commons.logging.UniqueLoggingContext
 import com.notnamed.commons.protocol.BaseProtocol
 import com.notnamed.groups.services.GroupService
 import com.notnamed.groups.services.GroupService.{GroupWithMembers, Members, NewGroup}
@@ -16,7 +16,7 @@ trait GroupRoutesProtocol extends BaseProtocol {
 
 class GroupRoutes(groupService: GroupService) extends GroupRoutesProtocol {
 
-  def routes() : Route = withRequestContext { implicit context: RequestContext =>
+  def routes() : Route = withRequestContext { implicit context: UniqueLoggingContext =>
       pathPrefix("group") {
         fetchEntity(groupService.fetchGroup) ~ createEntity(groupService.createGroup)
       }

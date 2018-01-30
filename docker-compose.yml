@@ -60,6 +60,20 @@ services:
       - users
       - zookeeper
       - kafka
+  notifications:
+    build:
+      context: ./notifications
+    command: ["sbt","run"]
+    volumes:
+      - "./commons:/app/commons"
+      - "./notifications:/app/notifications"
+      - "~/.sbt:/root/.sbt"
+      - "~/.ivy2:/root/.ivy2"
+    environment:
+      - "KAFKA_HOST=kafka"
+    depends_on:
+      - kafka
+      - zookeeper
   zookeeper:
     build:
       context: docker/zookeeper

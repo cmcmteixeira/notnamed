@@ -34,7 +34,7 @@ class Logger(typeSafeLogger: TypeSafeLogger) {
   }
 }
 
-trait LoggerWithContext {
+trait ContextualLogger {
   private val typesafeLogger: TypeSafeLogger = TypeSafeLogger.apply(LoggerFactory.getLogger(getClass.getName))
   val logger: Logger = new Logger(typesafeLogger)
 }

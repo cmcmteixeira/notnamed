@@ -3,7 +3,7 @@ package com.notnamed.user.service
 import java.util.UUID
 
 import com.notnamed.commons.entity.AuditInfo
-import com.notnamed.commons.logging.{FutureLogging, LoggerWithContext, RequestContext}
+import com.notnamed.commons.logging.{FutureLogging, ContextualLogger, UniqueLoggingContext}
 import com.notnamed.commons.time.TimeProvider
 import com.notnamed.commons.uuid.UUIDGenerator
 import com.notnamed.user.database.dao.UserDao
@@ -18,8 +18,8 @@ object UserService {
   case class NewUser(email: String)
 }
 
-class UserService(userDao: UserDao,uuidGen: UUIDGenerator)(implicit ec: ExecutionContext, timeProvider: TimeProvider) extends LoggerWithContext with FutureLogging {
-  def createUser(newUser: NewUser)(implicit requestContext: RequestContext) : Future[UUID] = userDao
+class UserService(userDao: UserDao,uuidGen: UUIDGenerator)(implicit ec: ExecutionContext, timeProvider: TimeProvider) extends ContextualLogger with FutureLogging {
+  def createUser(newUser: NewUser)(implicit requestContext: UniqueLoggingContext) : Future[UUID] = userDao
     .insert(User(
       uuidGen(),
       newUser.email,
@@ -30,7 +30,7 @@ class UserService(userDao: UserDao,uuidGen: UUIDGenerator)(implicit ec: Executio
     ))
     .andThen(logFutureFailure)
 
-  def findUser(id: UUID)(implicit requestContext: RequestContext) : Future[Option[UserModel]]= userDao
+  def findUser(id: UUID)(implicit requestContext: UniqueLoggingContext) : Future[Option[UserModel]]= userDao
     .findById(id)
     .andThen{
       case Success(Some(_)) => logger.info(s"Found user with [id:$id]")

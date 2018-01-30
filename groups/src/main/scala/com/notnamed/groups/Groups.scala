@@ -55,7 +55,7 @@ object Groups {
       Config.config.getConfig("akka.kafka.producer"),
       new StringSerializer,
       new StringSerializer
-    ).withBootstrapServers("kafka:9092")
+    )
 
     val producer: KafkaProducer[String, String] = producerSettings
       .createKafkaProducer()

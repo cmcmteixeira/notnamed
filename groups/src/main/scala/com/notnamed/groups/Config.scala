@@ -1,5 +1,6 @@
 package com.notnamed.groups
 
+import com.notnamed.commons.kafka.EventType
 import com.typesafe.config.ConfigFactory
 
 object Config {
@@ -21,5 +22,9 @@ object Config {
 
   val kafka = new {
     val host: String = config.getString("kafka.host")
+  }
+
+  val events = new {
+    val groupCreation = EventType("com.notnamed.groups.new.group")
   }
 }
