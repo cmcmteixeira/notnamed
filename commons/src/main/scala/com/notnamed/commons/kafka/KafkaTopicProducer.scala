@@ -7,38 +7,43 @@ import akka.kafka.scaladsl.Producer
 import akka.stream.Materializer
 import akka.stream.scaladsl.Source
 import com.notnamed.commons.formats.DefaultJsonFormats
-import io.circe.Encoder
+import com.notnamed.commons.time.TimeProvider
 import org.apache.kafka.clients.producer.{KafkaProducer, ProducerRecord}
 
 import scala.concurrent.{ExecutionContext, Future}
 
+object KafkaTopicProducer  {
 
-object KafkaTopicProducer extends DefaultJsonFormats {
-  import io.circe._
-  import io.circe.generic.semiauto._
-  import io.circe.syntax._
-
-
-
-  implicit def actionEventEncoder[A](implicit enc: Encoder[A]): Encoder[KafkaDetailedEvent[A]] = (a: KafkaDetailedEvent[A]) => Json.obj(
-    ("eventType", a.eventType.asJson(deriveEncoder)),
-    ("meta", a.meta.asJson(deriveEncoder)),
-    ("details", a.details.asJson(enc))
-  )
 
 }
 
 class KafkaTopicProducer(topic: String)(
+  timeProvider: TimeProvider,
+  producerId: String,
   settings: ProducerSettings[String,String],
   producer: KafkaProducer[String, String]
-)(implicit ec: ExecutionContext, materializer: Materializer){
-  import KafkaTopicProducer._
+)(implicit ec: ExecutionContext, materializer: Materializer) extends DefaultJsonFormats{
+  import io.circe._
+  import io.circe.generic.semiauto._
   import io.circe.syntax._
+  import KafkaTopicProducer._
 
-  def send[A](message: KafkaDetailedEvent[A])(implicit format: Encoder[A]): Future[Done] = {
+
+  implicit def actionEventEncoder[A <: KafkaEvent](implicit enc: Encoder[A]): Encoder[WrappedKafkaEvent[A]] = (a: WrappedKafkaEvent[A]) => Json.obj(
+    ("meta", a.meta.asJson(deriveEncoder)),
+    ("event", a.event.asJson(enc))
+  )
+
+  def send[A <: KafkaEvent](message: A)(implicit format: Encoder[A]): Future[Done] = {
     Source
-      .single(message.asJson(actionEventEncoder).toString)
-      .map(elem => new ProducerRecord[String,String](topic,elem))
+      .single(WrappedKafkaEvent(message, EventMetadata(
+        createdAt = timeProvider.now(),
+        createdBy = producerId,
+        traceId = ""
+      )))
+      .map(elem =>
+        new ProducerRecord[String,String](topic, elem.asJson(actionEventEncoder(format)).toString())
+      )
       .runWith(Producer.plainSink(settings,producer))
   }
 }

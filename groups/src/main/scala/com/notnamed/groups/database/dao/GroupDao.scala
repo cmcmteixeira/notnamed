@@ -4,9 +4,9 @@ import java.util.UUID
 
 import com.notnamed.commons.database.BaseDao
 import com.notnamed.commons.time.TimeProvider
-import com.notnamed.groups.database.dao.GroupDao.GroupFilters
 import com.notnamed.groups.database.entity.Group
 import com.notnamed.groups.database.table.Groups
+import com.typesafe.scalalogging.StrictLogging
 
 import scala.concurrent.{ExecutionContext, Future}
 import slick.jdbc.MySQLProfile.api._
@@ -20,17 +20,25 @@ object GroupDao {
                          )
 }
 
-class GroupDao(db: Database)(implicit ec: ExecutionContext, timeProvider: TimeProvider) extends BaseDao[Groups,Group]{
+class GroupDao(db: Database)(implicit ec: ExecutionContext, timeProvider: TimeProvider) extends BaseDao[Groups,Group] with StrictLogging {
   val table = TableQuery[Groups]
 
-  def createGroup(group: Group) : Future[UUID]= db.run {
-    table += group
-  }.map(insertionCheck(group))
-    .map(_ => group.id)
+  def createGroup(group: Group) : Future[UUID]= {
+    db.run {
+      table += group
+    }.map(insertionCheck(group))
+    .map{ _ =>
+      group.id
+    }
+  }
 
-  def findGroupById(id: UUID) : Future[Option[Group]]= db.run {
-    withGroupFilters(id = Some(id)).result
-  }.map(_.headOption)
+  def findGroupById(id: UUID) : Future[Option[Group]]= {
+    db.run {
+      withGroupFilters(id = Some(id)).result
+    }.map{ groups =>
+      groups.headOption
+    }
+  }
 
 
   private def withGroupFilters(

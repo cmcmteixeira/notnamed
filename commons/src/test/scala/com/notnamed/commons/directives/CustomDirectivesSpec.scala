@@ -12,7 +12,7 @@ import Directives._
 import scala.concurrent.Future
 
 class CustomDirectivesSpec extends WordSpec with Matchers with ScalaFutures with ScalatestRouteTest {
-  "someOr404" should {
+  /*"someOr404" should {
 
     "return 404 if a future of None is returned" in {
       val route = get {
@@ -116,5 +116,5 @@ class CustomDirectivesSpec extends WordSpec with Matchers with ScalaFutures with
     }
   }
 
-
+*/
 }

@@ -1,6 +1,6 @@
 package com.notnamed.groups
 
-import com.notnamed.commons.kafka.EventType
+import com.notnamed.commons.kafka.{EventId}
 import com.typesafe.config.ConfigFactory
 
 object Config {
@@ -25,6 +25,6 @@ object Config {
   }
 
   val events = new {
-    val groupCreation = EventType("com.notnamed.groups.new.group")
+    val groupCreation = EventId("com.notnamed.groups.new.group")
   }
 }

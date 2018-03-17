@@ -1,21 +1,21 @@
 package com.notnamed.commons.kafka
 
+import com.notnamed.commons.formats.DefaultJsonFormats
 import io.circe.Decoder
 
 object TypedKafkaEventDecoder {
-  def apply(decoders: Map[EventType, Decoder[_ <: KafkaEvent]]): TypedKafkaEventDecoder = new TypedKafkaEventDecoder(decoders)
-  def apply(decoders: (EventType, Decoder[_ <: KafkaEvent])*): TypedKafkaEventDecoder = new TypedKafkaEventDecoder(decoders.toMap)
+  def apply(decoders: Map[EventId, Decoder[_ <: KafkaEvent]]): TypedKafkaEventDecoder = new TypedKafkaEventDecoder(decoders)
 }
 
-class TypedKafkaEventDecoder(decoders: Map[EventType,Decoder[_ <: KafkaEvent]]) {
+class TypedKafkaEventDecoder(decoders: Map[EventId,Decoder[_ <: KafkaEvent]]) extends DefaultJsonFormats {
   import io.circe._
   import io.circe.generic.semiauto._
-  val eventTypeDecoder = deriveDecoder[EventType]
 
-  implicit val decoder: Decoder[KafkaEvent] = (c: HCursor) => for {
-      event <- c.downField("eventType").as[EventType](eventTypeDecoder)
-      value <- decoders(event)(c)
+  implicit val decoder: Decoder[WrappedKafkaEvent[KafkaEvent]] = (c: HCursor) => for {
+      eventName <- c.downField("event").downField("eventName").as[EventId](deriveDecoder)
+      event <- decoders(eventName)(c)
+      metadata <- c.downField("meta").as[EventMetadata](deriveDecoder)
   } yield {
-      value
+      WrappedKafkaEvent(event,metadata)
   }
 }

@@ -2,10 +2,10 @@ package com.notnamed.groups.dal
 
 import java.util.UUID
 
-import com.notnamed.commons.logging.{ContextualLogger, UniqueLoggingContext}
 import com.notnamed.commons.protocol.BaseProtocol
 import com.notnamed.commons.remote.BaseDal
 import com.softwaremill.sttp.SttpBackend
+import com.typesafe.scalalogging.StrictLogging
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -14,11 +14,11 @@ object UserDal extends BaseProtocol {
   case class User(id: UUID)
   implicit val userIdFormat = jsonFormat1(User)
 }
-class UserDal(basePath: String)(implicit akkaHttpBackend: SttpBackend[Future,_],ec: ExecutionContext) extends BaseDal with ContextualLogger {
+class UserDal(basePath: String)(implicit akkaHttpBackend: SttpBackend[Future,_],ec: ExecutionContext) extends StrictLogging {
   import UserDal._
   import spray.json._
   import com.softwaremill.sttp._
-  def fetchUserInfo(userId: UUID)(implicit context: UniqueLoggingContext) : Future[User] = sttpWContext
+  def fetchUserInfo(userId: UUID) : Future[User] = sttp
       .get(uri"$basePath/user/$userId")
       .send()
       .map{

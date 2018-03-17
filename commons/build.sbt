@@ -31,7 +31,9 @@ libraryDependencies ++= {
     "com.typesafe.scala-logging" %% "scala-logging" % "3.7.2",
     "io.circe" %% "circe-core" % circeVersion,
     "io.circe" %% "circe-generic" % circeVersion,
-    "io.circe" %% "circe-parser" % circeVersion
+    "io.circe" %% "circe-parser" % circeVersion,
+    "io.kamon" %% "kamon-core" % "1.0.0",
+    "io.kamon" %% "kamon-akka-http-2.5" % "1.0.1"
   )
 }
 

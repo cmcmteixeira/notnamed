@@ -1,64 +1,32 @@
 package com.notnamed.commons.directives
 
-import java.util.UUID
-
-import akka.http.scaladsl.marshalling.ToEntityMarshaller
 import akka.http.scaladsl.model.StatusCodes
-import akka.http.scaladsl.server.Directives._
-import akka.http.scaladsl.server.{Directive0, Directive1, Route}
-import akka.http.scaladsl.unmarshalling.FromRequestUnmarshaller
-import com.notnamed.commons.logging.UniqueLoggingContext
+import akka.http.scaladsl.server.RouteResult.{Complete, Rejected}
+import com.typesafe.scalalogging.StrictLogging
+import kamon.akka.http.TracingDirectives
 
-import scala.concurrent.Future
-import scala.util.{Failure, Success, Try}
+import scala.util.control.NonFatal
 
 object CustomDirectives extends CustomDirectives
 
-trait CustomDirectives {
-  def someOr404[T](future: Future[Option[T]])(implicit marshaller: ToEntityMarshaller[T]): Route = {
-    onComplete(future){
-      case Success(Some(value)) => complete((StatusCodes.OK, value))
-      case Success(None) => complete(StatusCodes.NotFound,"Not Found")
-      case Failure(_) => complete(StatusCodes.InternalServerError,"")
-    }
-  }
+trait CustomDirectives extends TracingDirectives with StrictLogging {
+  import akka.http.scaladsl.server.Directives._
+  import akka.http.scaladsl.server._
 
-  def createdOr500(future: Future[UUID]) : Route = {
-    onComplete(future){
-      case Success(uuid) => complete(StatusCodes.Created, uuid.toString)
-      case _ => complete(StatusCodes.InternalServerError,"")
-    }
-  }
-
-  def createEntity[T](creationFunc: (T) => Future[UUID])(implicit fromRequest: FromRequestUnmarshaller[T])  : Route = {
-    post {
-      entity(as[T]) { entity =>
-         createdOr500(creationFunc(entity))
+  def withRequestLogging: Directive0 = extractRequestContext.flatMap { ctx ⇒
+    logger.info(s"${ctx.request.method.value} ${ctx.request.uri} received")
+    mapRouteResult { result =>
+      result match {
+        case Complete(response) => logger.info(s"${ctx.request.method} ${ctx.request.uri} completed with status code ${response.status.value}")
+        case Rejected(_) => logger.error(s"${ctx.request.method} ${ctx.request.uri} rejected")
       }
+      result
     }
   }
 
-  def fetchEntity[T](entityAccess: (UUID) => Future[Option[T]])(implicit marshaller: ToEntityMarshaller[T]) : Route = {
-    path(JavaUUID) { entityId =>
-      get {
-        someOr404(entityAccess(entityId))
-      }
-    }
-  }
-
-
-  def withRequestContext : Directive1[UniqueLoggingContext] = new Directive1[UniqueLoggingContext] {
-    override def tapply(f: (Tuple1[UniqueLoggingContext]) => Route): Route = {
-      optionalHeaderValueByName("X-Request-ID") { header =>
-        val context = Try{
-          header.map(UUID.fromString)
-        } match {
-          case Success(Some(uuid)) => UniqueLoggingContext(uuid)
-          case _ => UniqueLoggingContext(UUID.randomUUID())
-        }
-        f(Tuple1(context))
-      }
-    }
-  }
-
+  def withExceptionHandling: Directive0 = handleExceptions( ExceptionHandler {
+    case NonFatal(e) =>
+      logger.error("Error while processing request", e)
+      complete(StatusCodes.InternalServerError,"Internal server error")
+  })
 }

@@ -46,7 +46,7 @@ object Groups {
     implicit val sttpBackend: SttpBackend[Future, Source[ByteString, Any]] = AkkaHttpBackend.usingActorSystem(system)
 
     val db = Database.forConfig("database")
-    implicit val clock : Clock = Clock.systemUTC()
+    val clock : Clock = Clock.systemUTC()
     implicit val timeProvider: TimeProvider = new TimeProvider(clock)
     implicit val ec: ExecutionContext = ExecutionContext.global
     val uuidGenerator = new UUIDGenerator
@@ -59,7 +59,7 @@ object Groups {
 
     val producer: KafkaProducer[String, String] = producerSettings
       .createKafkaProducer()
-    val kafkaProducer = new KafkaTopicProducer("groups")(producerSettings,producer)
+    val kafkaProducer = new KafkaTopicProducer("groups")(timeProvider,"com.notnamed.groups",producerSettings,producer)
 
     val groupDao = new GroupDao(db)
     val memberShipDao = new MembershipDao(db)

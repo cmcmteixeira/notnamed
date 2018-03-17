@@ -43,6 +43,6 @@ object Users {
 
     //val producer: ProducerSettings[Array[Byte], String] = ProducerSettings(Config.config, new ByteArraySerializer, new StringSerializer)
 
-    userRoutes.routes
+    userRoutes.routes()
   }
 }
