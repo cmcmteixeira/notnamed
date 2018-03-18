@@ -8,14 +8,12 @@ import akka.stream.Materializer
 import akka.stream.scaladsl.Source
 import com.notnamed.commons.formats.DefaultJsonFormats
 import com.notnamed.commons.time.TimeProvider
+import kamon.Kamon
+import kamon.trace.Span
 import org.apache.kafka.clients.producer.{KafkaProducer, ProducerRecord}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-object KafkaTopicProducer  {
-
-
-}
 
 class KafkaTopicProducer(topic: String)(
   timeProvider: TimeProvider,
@@ -26,7 +24,6 @@ class KafkaTopicProducer(topic: String)(
   import io.circe._
   import io.circe.generic.semiauto._
   import io.circe.syntax._
-  import KafkaTopicProducer._
 
 
   implicit def actionEventEncoder[A <: KafkaEvent](implicit enc: Encoder[A]): Encoder[WrappedKafkaEvent[A]] = (a: WrappedKafkaEvent[A]) => Json.obj(
@@ -39,7 +36,7 @@ class KafkaTopicProducer(topic: String)(
       .single(WrappedKafkaEvent(message, EventMetadata(
         createdAt = timeProvider.now(),
         createdBy = producerId,
-        traceId = ""
+        traceId = Kamon.currentContext().get(Span.ContextKey).context().traceID.string
       )))
       .map(elem =>
         new ProducerRecord[String,String](topic, elem.asJson(actionEventEncoder(format)).toString())

@@ -1,6 +1,5 @@
 package com.notnamed.groups.routes
 
-import akka.event.Logging
 import com.notnamed.commons.protocol.BaseProtocol
 import com.notnamed.groups.services.GroupService
 import com.notnamed.groups.services.GroupService.{GroupWithMembers, Members, NewGroup}

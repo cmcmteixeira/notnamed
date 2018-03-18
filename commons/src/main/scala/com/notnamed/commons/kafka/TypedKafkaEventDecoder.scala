@@ -12,8 +12,8 @@ class TypedKafkaEventDecoder(decoders: Map[EventId,Decoder[_ <: KafkaEvent]]) ex
   import io.circe.generic.semiauto._
 
   implicit val decoder: Decoder[WrappedKafkaEvent[KafkaEvent]] = (c: HCursor) => for {
-      eventName <- c.downField("event").downField("eventName").as[EventId](deriveDecoder)
-      event <- decoders(eventName)(c)
+      eventName <- c.downField("event").downField("eventId").as[EventId](deriveDecoder)
+      event <- c.downField("event").as(decoders(eventName))
       metadata <- c.downField("meta").as[EventMetadata](deriveDecoder)
   } yield {
       WrappedKafkaEvent(event,metadata)

@@ -27,7 +27,7 @@ object GroupService extends DefaultJsonFormats{
   case class Members(memberSince: Timestamp,userId: UUID)
   case class GroupWithMembers(id: UUID, members: List[Members], active: Boolean)
 
-  case class NewGroupEvent(identifier: EventId = Config.events.groupCreation, groupId: UUID) extends KafkaEvent
+  case class NewGroupEvent(eventId: EventId = Config.events.groupCreation, groupId: UUID) extends KafkaEvent
 
   case class GroupServiceException(description: String, cause: Exception = None.orNull) extends Throwable(description,cause)
 }

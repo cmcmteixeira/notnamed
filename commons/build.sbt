@@ -19,7 +19,7 @@ libraryDependencies ++= {
     "com.typesafe.akka" %% "akka-http" % akkaHttpV,
     "com.typesafe.akka" %% "akka-http-spray-json" % akkaHttpV,
     "com.typesafe.akka" %% "akka-http-testkit" % akkaHttpV,
-    "com.typesafe.akka" %% "akka-stream-kafka" % "0.17",
+    "com.typesafe.akka" %% "akka-stream-kafka" % "0.19",
     "com.typesafe.slick" %% "slick" % "3.2.0",
     "com.typesafe" % "config" % "1.3.1",
     "mysql" % "mysql-connector-java" % "5.1.12",

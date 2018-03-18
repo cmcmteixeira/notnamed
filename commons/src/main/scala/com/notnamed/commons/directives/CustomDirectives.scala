@@ -17,7 +17,7 @@ trait CustomDirectives extends TracingDirectives with StrictLogging {
     logger.info(s"${ctx.request.method.value} ${ctx.request.uri} received")
     mapRouteResult { result =>
       result match {
-        case Complete(response) => logger.info(s"${ctx.request.method} ${ctx.request.uri} completed with status code ${response.status.value}")
+        case Complete(response) => logger.info(s"${ctx.request.method.value} ${ctx.request.uri} completed with status code ${response.status.value}")
         case Rejected(_) => logger.error(s"${ctx.request.method} ${ctx.request.uri} rejected")
       }
       result

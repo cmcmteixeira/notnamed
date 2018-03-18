@@ -11,7 +11,7 @@ object GroupNotificationService {
 
 class GroupNotificationService extends StrictLogging {
   def sendNewGroupNotification(newGroupEvent: NewGroupEvent): Future[Unit] = {
-    logger.info(s"Notifing ${newGroupEvent.details.createdBy} because he/she created an group wih ID: ${newGroupEvent.details.id}")
+    logger.info(s"Notifing creator for group ${newGroupEvent.groupId} because he/she created an group")
     Future.successful(())
   }
 }

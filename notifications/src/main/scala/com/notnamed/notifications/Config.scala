@@ -1,15 +1,12 @@
 package com.notnamed.notifications
 
 
-import com.notnamed.commons.kafka.EventType
+import com.notnamed.commons.kafka.EventId
 import com.typesafe.config.ConfigFactory
 
 object Config {
   val config = ConfigFactory.load()
-  val http = new {
-   // val interface = config.getString("http.interface")
-   // val port = config.getInt("http.port")
-  }
+
 
   val database = new {
     //val url: String = config.getString("database.url")
@@ -26,6 +23,12 @@ object Config {
   }
 
   val groupEvents = new {
-    val newGroupEvent = EventType("com.notnamed.groups.new.group")
+    val newGroupEvent = EventId("com.notnamed.groups.new.group")
   }
+
+  val http = new {
+    val interface = config.getString("http.interface")
+    val port = config.getInt("http.port")
+  }
+
 }

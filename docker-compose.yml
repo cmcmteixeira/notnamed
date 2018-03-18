@@ -71,9 +71,15 @@ services:
       - "~/.ivy2:/root/.ivy2"
     environment:
       - "KAFKA_HOST=kafka"
+      - "DATABASE_URL=jdbc:mysql://db:3306/groups"
+      - "HTTP_INTERFACE=0.0.0.0"
+      - "HTTP_PORT=7000"
+      - "HOST_USER=http://users:3000"
     depends_on:
       - kafka
       - zookeeper
+    ports:
+      - 7000:7000
   zookeeper:
     build:
       context: docker/zookeeper
