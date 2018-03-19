@@ -33,7 +33,8 @@ libraryDependencies ++= {
     "io.circe" %% "circe-generic" % circeVersion,
     "io.circe" %% "circe-parser" % circeVersion,
     "io.kamon" %% "kamon-core" % "1.0.0",
-    "io.kamon" %% "kamon-akka-http-2.5" % "1.0.1"
+    "io.kamon" %% "kamon-akka-http-2.5" % "1.0.1",
+    "org.flywaydb" % "flyway-core" % "5.0.7"
   )
 }
 

@@ -1,17 +1,13 @@
 package com.notnamed.commons.kafka
 
-import java.time.Instant
-
 import akka.Done
 import akka.kafka.ConsumerMessage.CommittableOffsetBatch
 import akka.kafka.scaladsl.Consumer
 import akka.kafka.{ConsumerSettings, Subscriptions}
-import akka.stream.scaladsl.{Sink, Source}
+import akka.stream.scaladsl.Source
 import com.notnamed.commons.formats.DefaultJsonFormats
 import com.typesafe.scalalogging.StrictLogging
 import kamon.Kamon
-import kamon.context.{Context, TextMap}
-import kamon.trace.IdentityProvider.Identifier
 import kamon.trace.SpanContext.SamplingDecision
 import kamon.trace.{IdentityProvider, Span, SpanContext}
 import org.apache.kafka.clients.consumer.KafkaConsumer

@@ -3,12 +3,9 @@ package com.notnamed.groups.database.dao
 import java.util.UUID
 
 import com.notnamed.commons.database.BaseDao
-import com.notnamed.commons.entity.AuditInfo
 import com.notnamed.commons.time.TimeProvider
-import com.notnamed.commons.uuid.UUIDGenerator
-import com.notnamed.groups.database.entity.Member
+import com.notnamed.groups.database.entity.Membership
 import com.notnamed.groups.database.table.Members
-import slick.jdbc.MySQLProfile
 import slick.jdbc.MySQLProfile.api._
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -20,20 +17,16 @@ object MembershipDao{
 }
 
 class MembershipDao(val db: Database)
-                   (implicit ec: ExecutionContext, timeProvider: TimeProvider) extends BaseDao[Members,Member] {
+                   (implicit ec: ExecutionContext, timeProvider: TimeProvider) extends BaseDao[Members,Membership] {
 
   val table = TableQuery[Members]
-/*
-  def addMember(groupId: UUID, member: UUID): Future[UUID] = {
-    val entity = Member(uuidGen(), member, groupId, AuditInfo(
-      timeProvider.now(),
-      timeProvider.now()
-    ))
+
+  def addMember(member: Membership): Future[UUID] = {
     db.run {
-      table += entity
-    }.map(insertionCheck(entity))
-      .map(_ => entity.id)
-  }*/
+      table += member
+    }.map(insertionCheck(member))
+    .map(_ => member.id)
+  }
 
   def removeMember(groupId: UUID, member: UUID): Future[Unit] = db.run {
     withMembershipFilters(
@@ -46,7 +39,7 @@ class MembershipDao(val db: Database)
   }.map(singleUpdateCheck)
 
 
-  def findGroupMembers(groupId: UUID): Future[Seq[Member]] = db
+  def findGroupMembers(groupId: UUID): Future[Seq[Membership]] = db
     .run {
       withMembershipFilters(
         groups = Some(List(groupId))

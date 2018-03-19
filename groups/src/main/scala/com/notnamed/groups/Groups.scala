@@ -11,6 +11,7 @@ import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Source
 import akka.util.ByteString
 import com.notnamed.commons.kafka.KafkaTopicProducer
+import com.notnamed.commons.migrations.Migrations
 import com.notnamed.commons.time.TimeProvider
 import com.notnamed.commons.uuid.UUIDGenerator
 import com.notnamed.groups.dal.UserDal
@@ -35,6 +36,7 @@ object Groups {
 
   def main(args: Array[String]): Unit = {
     val config = ConfigFactory.load()
+    Migrations.run
     Http().bindAndHandle(
       routes,
       Config.http.interface,

@@ -7,6 +7,7 @@ import akka.event.Logging
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.server.Route
 import akka.stream.ActorMaterializer
+import com.notnamed.commons.migrations.Migrations
 import com.notnamed.commons.time.TimeProvider
 import com.notnamed.commons.uuid.UUIDGenerator
 import com.notnamed.user.database.dao.UserDao
@@ -25,7 +26,7 @@ object Users {
 
   def main(args: Array[String]): Unit = {
     val config = ConfigFactory.load()
-
+    Migrations.run
     Http().bindAndHandle(
       routes,
       Config.http.interface,

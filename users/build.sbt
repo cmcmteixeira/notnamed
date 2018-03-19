@@ -25,8 +25,7 @@ libraryDependencies ++= {
     "io.kamon" %% "kamon-akka-http-2.5" % "1.0.1",
     "io.kamon" %% "kamon-logback" % "1.0.0",
     "ch.qos.logback"  %   "logback-classic" % "1.2.3",
-    "org.scalatest" %% "scalatest" % "3.0.1" % "it,test"
+    "org.scalatest" %% "scalatest" % "3.0.1" % "it,test",
     "org.mockito" % "mockito-all" % "2.+" % "it,test"
-    "org.flywaydb" % "flyway-core" % "4.2.0"
   )
 }
